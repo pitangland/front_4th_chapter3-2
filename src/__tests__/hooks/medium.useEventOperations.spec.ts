@@ -177,3 +177,55 @@ it("네트워크 오류 시 '일정 삭제 실패'라는 텍스트가 노출되�
 
   expect(result.current.events).toHaveLength(1);
 });
+
+describe('반복 유형 선택 (with date-fns)', () => {
+  it('초기 반복 유형은 none이어야 한다', () => {
+    const { result } = renderHook(() => useEventForm());
+    expect(result.current.repeatType).toBe('none');
+  });
+
+  it('반복 유형을 매일로 설정할 수 있다', () => {
+    const { result } = renderHook(() => useEventForm());
+    act(() => {
+      result.current.setRepeatType('daily');
+    });
+    expect(result.current.repeatType).toBe('daily');
+  });
+
+  it('31일에 매월 반복일정을 설정할 경우 31일이 없는 달은 마지막 날로 설정해야 한다', () => {
+    const { result } = renderHook(() => useEventForm());
+
+    act(() => {
+      result.current.setDate('2024-01-31');
+      result.current.setRepeatType('monthly');
+    });
+
+    const nextDate = result.current.calculateNextRepeatDate(result.current.date);
+    expect(nextDate).toBe('2024-02-29'); // 2월은 윤년이므로 29일까지
+  });
+
+  it('윤년 2월 29일에 매월 반복일정을 설정할 경우 다음 일정은 3월 29일이다', () => {
+    const { result } = renderHook(() => useEventForm());
+
+    act(() => {
+      result.current.setDate('2024-02-29');
+      result.current.setRepeatType('monthly');
+    });
+
+    const nextDate = result.current.calculateNextRepeatDate(result.current.date);
+    expect(nextDate).toBe('2024-03-29');
+  });
+
+  it('반복 유형을 매년으로 설정 시 다음 해의 동일한 날짜로 설정된다', () => {
+    const { result } = renderHook(() => useEventForm());
+
+    act(() => {
+      result.current.setDate('2023-05-10');
+      result.current.setRepeatType('yearly');
+    });
+
+    const nextDate = result.current.calculateNextRepeatDate(result.current.date);
+    expect(nextDate).toBe('2024-05-10');
+  });
+});
+
