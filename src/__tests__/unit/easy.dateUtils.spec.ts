@@ -9,6 +9,7 @@ import {
   getWeekDates,
   getWeeksAtMonth,
   isDateInRange,
+  calculateNextRepeatDate,
 } from '../../utils/dateUtils';
 
 describe('getDaysInMonth', () => {
@@ -296,5 +297,52 @@ describe('formatDate', () => {
   it('일이 한 자리 수일 때 앞에 0을 붙여 포맷팅한다', () => {
     const testDate = new Date('2023-12-05');
     expect(formatDate(testDate)).toBe('2023-12-05');
+  });
+});
+
+describe('calculateNextRepeatDate', () => {
+  it('반복 유형을 매일로 설정할 수 있다', () => {
+    const nextDate = calculateNextRepeatDate('2024-05-01', 'daily', 1);
+    expect(nextDate).toBe('2024-05-02');
+  });
+
+  it('31일에 매월 반복일정을 설정할 경우 31일이 없는 달은 마지막 날로 설정해야 한다', () => {
+    const nextDate = calculateNextRepeatDate('2024-01-31', 'monthly', 1);
+    expect(nextDate).toBe('2024-02-29'); // 2월은 윤년이므로 29일까지
+  });
+
+  it('윤년 2월 29일에 매월 반복일정을 설정할 경우 다음 일정은 3월 29일이다', () => {
+    const nextDate = calculateNextRepeatDate('2024-02-29', 'monthly', 1);
+    expect(nextDate).toBe('2024-03-29');
+  });
+
+  it('반복 유형을 매년으로 설정 시 다음 해의 동일한 날짜로 설정된다', () => {
+    const nextDate = calculateNextRepeatDate('2023-05-10', 'yearly', 1);
+    expect(nextDate).toBe('2024-05-10');
+  });
+
+  it('매일 2일 간격으로 반복일정을 계산한다', () => {
+    const nextDate = calculateNextRepeatDate('2024-05-01', 'daily', 2);
+    expect(nextDate).toBe('2024-05-03'); // 2일 후
+  });
+
+  it('매주 3주 간격으로 반복일정을 계산한다', () => {
+    const nextDate = calculateNextRepeatDate('2024-05-01', 'weekly', 3);
+    expect(nextDate).toBe('2024-05-22'); // 3주 후
+  });
+
+  it('매월 2개월 간격으로 반복일정을 계산한다 (31일 처리)', () => {
+    const nextDate = calculateNextRepeatDate('2024-01-31', 'monthly', 2);
+    expect(nextDate).toBe('2024-03-31'); // 2개월 후 (3월의 마지막 날)
+  });
+
+  it('윤년 2월 29일에 매월 반복일정을 설정하면 다음 일정은 3월 29일이다', () => {
+    const nextDate = calculateNextRepeatDate('2024-02-29', 'monthly', 1);
+    expect(nextDate).toBe('2024-03-29');
+  });
+
+  it('매년 2년 간격으로 반복일정을 계산한다', () => {
+    const nextDate = calculateNextRepeatDate('2024-05-01', 'yearly', 2);
+    expect(nextDate).toBe('2026-05-01'); // 2년 후
   });
 });
