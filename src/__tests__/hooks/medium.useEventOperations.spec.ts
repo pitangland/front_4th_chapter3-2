@@ -229,7 +229,7 @@ describe('반복 유형 선택 (with date-fns)', () => {
   });
 });
 
-describe.only('반복 간격 설정', () => {
+describe('반복 간격 설정', () => {
   it('매일 2일 간격으로 반복일정을 설정할 수 있다', () => {
     const { result } = renderHook(() => useEventForm());
 
