@@ -48,13 +48,13 @@ export const useEventForm = (initialEvent?: Event) => {
 
     switch (repeatType) {
       case 'daily':
-        nextDate = addDays(dateObj, 1);
+        nextDate = addDays(dateObj, repeatInterval);
         break;
       case 'weekly':
-        nextDate = addWeeks(dateObj, 1);
+        nextDate = addWeeks(dateObj, repeatInterval);
         break;
       case 'monthly':
-        const tentativeNextMonth = addMonths(dateObj, 1);
+        const tentativeNextMonth = addMonths(dateObj, repeatInterval);
         const lastDayInNextMonth = getDate(lastDayOfMonth(tentativeNextMonth));
 
         // 31일이 없는 달은 마지막 날로 설정
@@ -69,7 +69,7 @@ export const useEventForm = (initialEvent?: Event) => {
         }
         break;
       case 'yearly':
-        nextDate = addYears(dateObj, 1);
+        nextDate = addYears(dateObj, repeatInterval);
         break;
       default:
         nextDate = dateObj;
