@@ -40,11 +40,11 @@ import {
 } from '@chakra-ui/react';
 import { useRef, useState } from 'react';
 
-import { useCalendarView } from './hooks/useCalendarView.ts';
-import { useEventForm } from './hooks/useEventForm.ts';
-import { useEventOperations } from './hooks/useEventOperations.ts';
-import { useNotifications } from './hooks/useNotifications.ts';
-import { useSearch } from './hooks/useSearch.ts';
+import { useCalendarView } from './hooks/useCalendarView';
+import { useEventForm } from './hooks/useEventForm';
+import { useEventOperations } from './hooks/useEventOperations';
+import { useNotifications } from './hooks/useNotifications';
+import { useSearch } from './hooks/useSearch';
 import { Event, EventForm, RepeatType } from './types';
 import {
   formatDate,
@@ -70,6 +70,14 @@ const notificationOptions = [
 ];
 
 function App() {
+  const repeatTypes = [
+    { value: 'none', label: '반복 없음' },
+    { value: 'daily', label: '매일' },
+    { value: 'weekly', label: '매주' },
+    { value: 'monthly', label: '매월' },
+    { value: 'yearly', label: '매년' },
+  ];
+
   const {
     title,
     setTitle,
@@ -384,10 +392,11 @@ function App() {
                   value={repeatType}
                   onChange={(e) => setRepeatType(e.target.value as RepeatType)}
                 >
-                  <option value="daily">매일</option>
-                  <option value="weekly">매주</option>
-                  <option value="monthly">매월</option>
-                  <option value="yearly">매년</option>
+                  {repeatTypes.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </Select>
               </FormControl>
               <HStack width="100%">
