@@ -1,7 +1,7 @@
-import { addDays, addWeeks, addMonths, addYears, lastDayOfMonth, getDate } from 'date-fns';
 import { ChangeEvent, useState } from 'react';
 
 import { Event, RepeatType } from '../types';
+import { calculateNextRepeatDate } from '../utils/dateUtils';
 import { getTimeErrorMessage } from '../utils/timeValidation';
 
 type TimeErrorRecord = Record<'startTimeError' | 'endTimeError', string | null>;
@@ -40,42 +40,9 @@ export const useEventForm = (initialEvent?: Event) => {
   };
 
   // 반복 일정 계산
-  const calculateNextRepeatDate = (currentDate: string): string => {
-    const dateObj = new Date(currentDate);
-    const originalDay = getDate(dateObj); // 원래 일(day) 저장
-
-    let nextDate;
-
-    switch (repeatType) {
-      case 'daily':
-        nextDate = addDays(dateObj, repeatInterval);
-        break;
-      case 'weekly':
-        nextDate = addWeeks(dateObj, repeatInterval);
-        break;
-      case 'monthly':
-        const tentativeNextMonth = addMonths(dateObj, repeatInterval);
-        const lastDayInNextMonth = getDate(lastDayOfMonth(tentativeNextMonth));
-
-        // 31일이 없는 달은 마지막 날로 설정
-        if (originalDay > lastDayInNextMonth) {
-          nextDate = lastDayOfMonth(tentativeNextMonth);
-        } else {
-          nextDate = new Date(
-            tentativeNextMonth.getFullYear(),
-            tentativeNextMonth.getMonth(),
-            originalDay
-          );
-        }
-        break;
-      case 'yearly':
-        nextDate = addYears(dateObj, repeatInterval);
-        break;
-      default:
-        nextDate = dateObj;
-    }
-
-    return nextDate.toISOString().split('T')[0];
+  const getNextDate = (date: string) => {
+    if (repeatType === 'none') return date;
+    return calculateNextRepeatDate(date, repeatType, repeatInterval);
   };
 
   const resetForm = () => {
@@ -140,7 +107,7 @@ export const useEventForm = (initialEvent?: Event) => {
     setEditingEvent,
     handleStartTimeChange,
     handleEndTimeChange,
-    calculateNextRepeatDate,
+    calculateNextRepeatDate: getNextDate,
     resetForm,
     editEvent,
   };

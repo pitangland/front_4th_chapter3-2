@@ -1,4 +1,6 @@
-import { Event } from '../types.ts';
+import { addDays, addWeeks, addMonths, addYears, lastDayOfMonth, getDate } from 'date-fns';
+
+import { Event } from '../types';
 
 /**
  * 주어진 년도와 월의 일수를 반환합니다.
@@ -108,3 +110,40 @@ export function formatDate(currentDate: Date, day?: number) {
     fillZero(day ?? currentDate.getDate()),
   ].join('-');
 }
+
+export const calculateNextRepeatDate = (
+  currentDate: string,
+  repeatType: 'daily' | 'weekly' | 'monthly' | 'yearly',
+  repeatInterval: number
+): string => {
+  const dateObj = new Date(currentDate);
+  const originalDay = getDate(dateObj); // 원래 날짜 저장
+
+  let nextDate;
+
+  switch (repeatType) {
+    case 'daily':
+      nextDate = addDays(dateObj, repeatInterval);
+      break;
+    case 'weekly':
+      nextDate = addWeeks(dateObj, repeatInterval);
+      break;
+    case 'monthly':
+      const tentativeNextMonth = addMonths(dateObj, repeatInterval);
+      const lastDayInNextMonth = getDate(lastDayOfMonth(tentativeNextMonth));
+
+      // 31일이 없는 달은 마지막 날로 설정
+      nextDate =
+        originalDay > lastDayInNextMonth
+          ? lastDayOfMonth(tentativeNextMonth)
+          : new Date(tentativeNextMonth.getFullYear(), tentativeNextMonth.getMonth(), originalDay);
+      break;
+    case 'yearly':
+      nextDate = addYears(dateObj, repeatInterval);
+      break;
+    default:
+      nextDate = dateObj;
+  }
+
+  return nextDate.toISOString().split('T')[0];
+};
