@@ -21,11 +21,8 @@ const setup = (element: ReactElement) => {
 };
 
 // ! Hard 여기 제공 안함
-const saveSchedule = async (
-  user: UserEvent,
-  form: Omit<Event, 'id' | 'notificationTime' | 'repeat'>
-) => {
-  const { title, date, startTime, endTime, location, description, category } = form;
+const saveSchedule = async (user: UserEvent, form: Omit<Event, 'id' | 'notificationTime'>) => {
+  const { title, date, startTime, endTime, location, description, category, repeat } = form;
 
   await user.click(screen.getAllByText('일정 추가')[0]);
 
@@ -36,6 +33,15 @@ const saveSchedule = async (
   await user.type(screen.getByLabelText('설명'), description);
   await user.type(screen.getByLabelText('위치'), location);
   await user.selectOptions(screen.getByLabelText('카테고리'), category);
+
+  if (repeat) {
+    // await user.click(screen.getByLabelText('반복 일정')); // 체크박스 클릭
+
+    await screen.findByLabelText('반복 유형');
+
+    await user.selectOptions(screen.getByLabelText('반복 유형'), repeat.type);
+    await user.type(screen.getByLabelText('반복 간격'), repeat.interval.toString());
+  }
 
   await user.click(screen.getByTestId('event-submit-button'));
 };
@@ -54,6 +60,7 @@ describe('일정 CRUD 및 기본 기능', () => {
       description: '프로젝트 진행 상황 논의',
       location: '회의실 A',
       category: '업무',
+      repeat: { type: 'none', interval: 0 },
     });
 
     const eventList = within(screen.getByTestId('event-list'));
@@ -125,6 +132,7 @@ describe('일정 뷰', () => {
       description: '이번주 팀 회의입니다.',
       location: '회의실 A',
       category: '업무',
+      repeat: { type: 'none', interval: 0 },
     });
 
     await user.selectOptions(screen.getByLabelText('view'), 'week');
@@ -157,6 +165,7 @@ describe('일정 뷰', () => {
       description: '이번달 팀 회의입니다.',
       location: '회의실 A',
       category: '업무',
+      repeat: { type: 'none', interval: 0 },
     });
 
     const monthView = within(screen.getByTestId('month-view'));
@@ -279,6 +288,7 @@ describe('일정 충돌', () => {
       description: '설명',
       location: '회의실 A',
       category: '업무',
+      repeat: { type: 'none', interval: 0 },
     });
 
     expect(screen.getByText('일정 겹침 경고')).toBeInTheDocument();
@@ -323,4 +333,76 @@ it('notificationTime을 10으로 하면 지정 시간 10분 전 알람 텍스트
   });
 
   expect(screen.getByText('10분 후 기존 회의 일정이 시작됩니다.')).toBeInTheDocument();
+});
+
+describe('반복 일정 표시', () => {
+  it('반복 일정에는 🔁 아이콘이 표시된다', async () => {
+    setupMockHandlerCreation();
+    const { user } = setup(<App />);
+
+    // 반복 일정 추가 (매주 반복)
+    await saveSchedule(user, {
+      title: '반복되는 미팅',
+      date: '2024-10-01',
+      startTime: '10:00',
+      endTime: '11:00',
+      description: '정기 미팅',
+      location: '회의실 A',
+      category: '업무',
+      repeat: { type: 'weekly', interval: 1 },
+    });
+
+    await user.selectOptions(screen.getByLabelText('view'), 'week');
+
+    const weekView = within(screen.getByTestId('week-view'));
+
+    const repeatMeetings = await weekView.findAllByText('반복되는 미팅');
+    expect(repeatMeetings.length).toBeGreaterThan(0);
+
+    const repeatIcons = await screen.findAllByText('🔁');
+    expect(repeatIcons.length).toBeGreaterThan(0);
+  });
+
+  it('반복 일정이 주간 뷰에서 올바르게 표시된다', async () => {
+    setupMockHandlerCreation();
+    const { user } = setup(<App />);
+
+    await saveSchedule(user, {
+      title: '주간 정기 미팅',
+      date: '2024-10-01',
+      startTime: '10:00',
+      endTime: '11:00',
+      description: '팀 주간 미팅',
+      location: '회의실 B',
+      category: '업무',
+      repeat: { type: 'weekly', interval: 1 },
+    });
+
+    // 주간뷰에서 확인
+    await user.selectOptions(screen.getByLabelText('view'), 'week');
+
+    const weekView = within(screen.getByTestId('week-view'));
+    expect(weekView.getByText('주간 정기 미팅')).toBeInTheDocument();
+  });
+
+  it('반복 일정이 월간 뷰에서 올바르게 표시된다', async () => {
+    setupMockHandlerCreation();
+    const { user } = setup(<App />);
+
+    await saveSchedule(user, {
+      title: '월간 전략 회의',
+      date: '2024-10-01',
+      startTime: '14:00',
+      endTime: '15:00',
+      description: '전략 회의',
+      location: '본사 회의실',
+      category: '업무',
+      repeat: { type: 'monthly', interval: 1 },
+    });
+
+    await user.selectOptions(screen.getByLabelText('view'), 'month');
+
+    const monthView = within(screen.getByTestId('month-view'));
+    expect(monthView.getByText('월간 전략 회의')).toBeInTheDocument();
+  });
 });
