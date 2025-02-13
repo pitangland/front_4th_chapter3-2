@@ -8,9 +8,7 @@ export const setupMockHandlerCreation = (initEvents = [] as Event[]) => {
   const mockEvents: Event[] = [...initEvents];
 
   server.use(
-    http.get('/api/events', () => {
-      return HttpResponse.json({ events: mockEvents });
-    }),
+    http.get('/api/events', () => HttpResponse.json({ events: mockEvents })),
     http.post('/api/events', async ({ request }) => {
       const newEvent = (await request.json()) as Event;
       newEvent.id = String(mockEvents.length + 1); // 간단한 ID 생성
@@ -80,9 +78,7 @@ export const setupMockHandlerDeletion = () => {
   ];
 
   server.use(
-    http.get('/api/events', () => {
-      return HttpResponse.json({ events: mockEvents });
-    }),
+    http.get('/api/events', () => HttpResponse.json({ events: mockEvents })),
     http.delete('/api/events/:id', ({ params }) => {
       const { id } = params;
       const index = mockEvents.findIndex((event) => event.id === id);
