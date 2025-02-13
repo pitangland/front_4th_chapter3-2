@@ -103,7 +103,7 @@ it('존재하는 이벤트 삭제 시 에러없이 아이템이 삭제된다.', 
   const { result } = renderHook(() => useEventOperations(false));
 
   await act(async () => {
-    await result.current.deleteEvent('1');
+    await result.current.deleteEvent({ id: '1' });
   });
 
   await act(() => Promise.resolve(null));
@@ -166,7 +166,7 @@ it("네트워크 오류 시 '일정 삭제 실패'라는 텍스트가 노출되�
   await act(() => Promise.resolve(null));
 
   await act(async () => {
-    await result.current.deleteEvent('1');
+    await result.current.deleteEvent({ id: '1' });
   });
 
   expect(toastFn).toHaveBeenCalledWith({
@@ -230,6 +230,37 @@ describe('반복 유형 선택 (with date-fns)', () => {
   });
 });
 
+describe.only('반복 일정 단일 수정', () => {
+  it('반복 일정에서 특정 날짜의 일정만 단일 일정으로 변경할 수 있다', async () => {
+    setupMockHandlerUpdating();
+
+    const { result } = renderHook(() => useEventOperations(true));
+
+    await act(() => Promise.resolve(null));
+
+    const updatedEvent: Event = {
+      id: '2',
+      date: '2024-10-15',
+      startTime: '11:00',
+      description: '기존 팀 미팅 2',
+      location: '회의실 C',
+      category: '업무 회의',
+      repeat: {
+        type: 'none',
+        interval: 0,
+      },
+      notificationTime: 5,
+      title: '수정된 회의',
+      endTime: '11:00',
+    };
+
+    await act(async () => {
+      await result.current.saveEvent(updatedEvent);
+    });
+
+    expect(result.current.events[1]).toEqual(updatedEvent);
+  });
+});
 
 describe('반복 일정 단일 삭제', () => {
   it('반복 일정에서 특정 날짜의 일정만 삭제할 수 있다', async () => {
