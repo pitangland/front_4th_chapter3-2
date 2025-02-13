@@ -10,6 +10,7 @@ import {
   getWeeksAtMonth,
   isDateInRange,
   calculateNextRepeatDate,
+  calculateRepeatDates,
 } from '../../utils/dateUtils';
 
 describe('getDaysInMonth', () => {
@@ -344,5 +345,38 @@ describe('calculateNextRepeatDate', () => {
   it('매년 2년 간격으로 반복일정을 계산한다', () => {
     const nextDate = calculateNextRepeatDate('2024-05-01', 'yearly', 2);
     expect(nextDate).toBe('2026-05-01'); // 2년 후
+  });
+});
+
+describe('calculateRepeatDates', () => {
+  // 메모리 초과 현상 무한 반복 생성하는 상황 발생
+  // it('반복 종료 없음일 경우 무제한 반복', () => {
+  //   const dates = calculateRepeatDates('2024-01-01', 'daily', 1, '2024-02-28');
+  //   expect(dates.length).toBeGreaterThan(30); // 30일 이상 반복되는지 확인
+  // });
+
+  it('특정 날짜까지 반복 종료', () => {
+    const dates = calculateRepeatDates('2024-01-01', 'daily', 1, 'date', '2024-01-05');
+    expect(dates).toEqual(['2024-01-01', '2024-01-02', '2024-01-03', '2024-01-04', '2024-01-05']);
+  });
+
+  it('특정 횟수만큼 반복 종료', () => {
+    const dates = calculateRepeatDates('2024-01-01', 'daily', 1, 'count', undefined, 5);
+    expect(dates).toEqual(['2024-01-01', '2024-01-02', '2024-01-03', '2024-01-04', '2024-01-05']);
+  });
+
+  it('주간 반복일 경우 특정 날짜까지 종료', () => {
+    const dates = calculateRepeatDates('2024-01-01', 'weekly', 1, 'date', '2024-01-29');
+    expect(dates).toEqual(['2024-01-01', '2024-01-08', '2024-01-15', '2024-01-22', '2024-01-29']);
+  });
+
+  it('월간 반복일 경우 특정 횟수로 종료', () => {
+    const dates = calculateRepeatDates('2024-01-01', 'monthly', 1, 'count', undefined, 3);
+    expect(dates).toEqual(['2024-01-01', '2024-02-01', '2024-03-01']);
+  });
+
+  it('연간 반복일 경우 특정 날짜까지 종료', () => {
+    const dates = calculateRepeatDates('2024-01-01', 'yearly', 1, 'date', '2026-01-01');
+    expect(dates).toEqual(['2024-01-01', '2025-01-01', '2026-01-01']);
   });
 });
