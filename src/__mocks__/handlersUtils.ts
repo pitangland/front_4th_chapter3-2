@@ -47,9 +47,7 @@ export const setupMockHandlerUpdating = () => {
   ];
 
   server.use(
-    http.get('/api/events', () => {
-      return HttpResponse.json({ events: mockEvents });
-    }),
+    http.get('/api/events', () => HttpResponse.json({ events: mockEvents })),
     http.put('/api/events/:id', async ({ params, request }) => {
       const { id } = params;
       const updatedEvent = (await request.json()) as Event;
