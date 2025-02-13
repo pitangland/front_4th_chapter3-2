@@ -138,6 +138,11 @@ function App() {
       return;
     }
 
+    let isBatchUpdate;
+    if (isRepeating) {
+      isBatchUpdate = true;
+    }
+
     const eventData: Event | EventForm = {
       id: editingEvent ? editingEvent.id : undefined,
       title,
@@ -160,7 +165,7 @@ function App() {
       setOverlappingEvents(overlapping);
       setIsOverlapDialogOpen(true);
     } else {
-      await saveEvent(eventData);
+      await saveEvent(eventData, isBatchUpdate);
       resetForm();
     }
   };

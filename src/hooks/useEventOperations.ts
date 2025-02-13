@@ -26,15 +26,37 @@ export const useEventOperations = (editing: boolean, onSave?: () => void) => {
     }
   };
 
-  const saveEvent = async (eventData: Event | EventForm) => {
+  const saveEvent = async (eventData: Event | EventForm, isBatchUpdate = false) => {
     try {
       let response;
       if (editing) {
-        response = await fetch(`/api/events/${(eventData as Event).id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(eventData),
-        });
+        const existingEvent = await fetch(`/api/events/${(eventData as Event).id}`).then((res) =>
+          res.json()
+        );
+
+        let updatedEvent = { ...eventData };
+        if (existingEvent.repeat && existingEvent.repeat.type !== 'none') {
+          updatedEvent = {
+            ...eventData,
+            repeat: {
+              type: 'none',
+              interval: 0,
+            },
+          };
+        }
+        if (isBatchUpdate) {
+          response = await fetch(`/api/events-list`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ events: [updatedEvent] }),
+          });
+        } else {
+          response = await fetch(`/api/events/${(eventData as Event).id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedEvent),
+          });
+        }
       } else {
         response = await fetch('/api/events', {
           method: 'POST',
