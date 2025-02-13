@@ -4,7 +4,6 @@ import { http, HttpResponse } from 'msw';
 import {
   setupMockHandlerCreation,
   setupMockHandlerDeletion,
-  setupMockHandlerRepeatDeletion,
   setupMockHandlerUpdating,
 } from '../../__mocks__/handlersUtils';
 import { useEventForm } from '../../hooks/useEventForm';
@@ -264,8 +263,6 @@ describe('반복 일정 단일 수정', () => {
 
 describe('반복 일정 단일 삭제', () => {
   it('반복 일정에서 특정 날짜의 일정만 삭제할 수 있다', async () => {
-    setupMockHandlerRepeatDeletion();
-
     const { result } = renderHook(() => useEventOperations(true, () => {}));
 
     await act(async () => {
