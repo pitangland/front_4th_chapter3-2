@@ -27,14 +27,8 @@ import {
   IconButton,
   Input,
   Select,
-  Table,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
   Tooltip,
-  Tr,
   useToast,
   VStack,
 } from '@chakra-ui/react';
@@ -91,6 +85,10 @@ function App() {
     setRepeatType,
     repeatInterval,
     setRepeatInterval,
+    repeatEndType,
+    setRepeatEndType,
+    repeatOccurrences,
+    setRepeatOccurrences,
     repeatEndDate,
     setRepeatEndDate,
     notificationTime,
@@ -285,6 +283,46 @@ function App() {
                     value={repeatEndDate}
                     onChange={(e) => setRepeatEndDate(e.target.value)}
                   />
+                  {isRepeating && (
+                    <VStack width="100%">
+                      <FormControl>
+                        <FormLabel>반복 종료 방식</FormLabel>
+                        <Select
+                          value={repeatEndType}
+                          onChange={(e) =>
+                            setRepeatEndType(e.target.value as 'none' | 'date' | 'count')
+                          }
+                        >
+                          <option value="none">종료 없음</option>
+                          <option value="date">특정 날짜</option>
+                          <option value="count">횟수 지정</option>
+                        </Select>
+                      </FormControl>
+
+                      {repeatEndType === 'date' && (
+                        <FormControl>
+                          <FormLabel>반복 종료 날짜</FormLabel>
+                          <Input
+                            type="date"
+                            value={repeatEndDate}
+                            onChange={(e) => setRepeatEndDate(e.target.value)}
+                          />
+                        </FormControl>
+                      )}
+
+                      {repeatEndType === 'count' && (
+                        <FormControl>
+                          <FormLabel>반복 횟수</FormLabel>
+                          <Input
+                            type="number"
+                            value={repeatOccurrences}
+                            onChange={(e) => setRepeatOccurrences(Number(e.target.value))}
+                            min={1}
+                          />
+                        </FormControl>
+                      )}
+                    </VStack>
+                  )}
                 </FormControl>
               </HStack>
             </VStack>

@@ -1,4 +1,12 @@
-import { addDays, addWeeks, addMonths, addYears, lastDayOfMonth, getDate } from 'date-fns';
+import {
+  addDays,
+  addWeeks,
+  addMonths,
+  addYears,
+  lastDayOfMonth,
+  getDate,
+  isBefore,
+} from 'date-fns';
 
 import { Event } from '../types';
 
@@ -111,6 +119,7 @@ export function formatDate(currentDate: Date, day?: number) {
   ].join('-');
 }
 
+// 반복일정
 export const calculateNextRepeatDate = (
   currentDate: string,
   repeatType: 'daily' | 'weekly' | 'monthly' | 'yearly',
@@ -146,4 +155,52 @@ export const calculateNextRepeatDate = (
   }
 
   return nextDate.toISOString().split('T')[0];
+};
+
+//반복종료
+export const calculateRepeatDates = (
+  startDate: string,
+  repeatType: 'daily' | 'weekly' | 'monthly' | 'yearly',
+  repeatInterval: number,
+  repeatEndType: 'none' | 'date' | 'count',
+  repeatEndDate?: string,
+  repeatOccurrences?: number
+): string[] => {
+  const dates: string[] = [];
+  let currentDate = new Date(startDate);
+  let count = 0;
+
+  while (true) {
+    if (
+      repeatEndType === 'date' &&
+      repeatEndDate &&
+      isBefore(new Date(repeatEndDate), currentDate)
+    ) {
+      break;
+    }
+    if (repeatEndType === 'count' && repeatOccurrences && count >= repeatOccurrences) {
+      break;
+    }
+
+    dates.push(currentDate.toISOString().split('T')[0]); // YYYY-MM-DD 형식 저장
+
+    switch (repeatType) {
+      case 'daily':
+        currentDate = addDays(currentDate, repeatInterval);
+        break;
+      case 'weekly':
+        currentDate = addWeeks(currentDate, repeatInterval);
+        break;
+      case 'monthly':
+        currentDate = addMonths(currentDate, repeatInterval);
+        break;
+      case 'yearly':
+        currentDate = addYears(currentDate, repeatInterval);
+        break;
+    }
+
+    count++;
+  }
+
+  return dates;
 };

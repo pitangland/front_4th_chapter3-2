@@ -1,7 +1,7 @@
 import { ChangeEvent, useState } from 'react';
 
 import { Event, RepeatType } from '../types';
-import { calculateNextRepeatDate } from '../utils/dateUtils';
+import { calculateNextRepeatDate, calculateRepeatDates } from '../utils/dateUtils';
 import { getTimeErrorMessage } from '../utils/timeValidation';
 
 type TimeErrorRecord = Record<'startTimeError' | 'endTimeError', string | null>;
@@ -17,6 +17,8 @@ export const useEventForm = (initialEvent?: Event) => {
   const [isRepeating, setIsRepeating] = useState(initialEvent?.repeat.type !== 'none');
   const [repeatType, setRepeatType] = useState<RepeatType>(initialEvent?.repeat.type || 'none');
   const [repeatInterval, setRepeatInterval] = useState(initialEvent?.repeat.interval || 1);
+  const [repeatEndType, setRepeatEndType] = useState<'none' | 'date' | 'count'>('none');
+  const [repeatOccurrences, setRepeatOccurrences] = useState(1);
   const [repeatEndDate, setRepeatEndDate] = useState(initialEvent?.repeat.endDate || '');
   const [notificationTime, setNotificationTime] = useState(initialEvent?.notificationTime || 10);
 
@@ -43,6 +45,19 @@ export const useEventForm = (initialEvent?: Event) => {
   const getNextDate = (date: string) => {
     if (repeatType === 'none') return date;
     return calculateNextRepeatDate(date, repeatType, repeatInterval);
+  };
+
+  // 반복 종료 계산
+  const getRepeatDates = () => {
+    if (repeatType === 'none') return [date];
+    return calculateRepeatDates(
+      date,
+      repeatType,
+      repeatInterval,
+      repeatEndType,
+      repeatEndDate,
+      repeatOccurrences
+    );
   };
 
   const resetForm = () => {
@@ -97,6 +112,10 @@ export const useEventForm = (initialEvent?: Event) => {
     setRepeatType,
     repeatInterval,
     setRepeatInterval,
+    repeatEndType,
+    setRepeatEndType,
+    repeatOccurrences,
+    setRepeatOccurrences,
     repeatEndDate,
     setRepeatEndDate,
     notificationTime,
@@ -108,6 +127,7 @@ export const useEventForm = (initialEvent?: Event) => {
     handleStartTimeChange,
     handleEndTimeChange,
     calculateNextRepeatDate: getNextDate,
+    calculateRepeatDates: getRepeatDates,
     resetForm,
     editEvent,
   };
