@@ -92,3 +92,20 @@ export const setupMockHandlerDeletion = () => {
     })
   );
 };
+
+export const setupMockHandlerRepeatDeletion = () => {
+  const mockEvents: Event[] = [
+    {
+      id: '1',
+      title: '삭제할 이벤트',
+      date: '2024-10-15',
+      startTime: '09:00',
+      endTime: '10:00',
+      description: '삭제할 이벤트입니다',
+      location: '어딘가',
+      category: '기타',
+      repeat: { type: 'monthly', interval: 0 },
+      notificationTime: 10,
+    },
+  ];
+};

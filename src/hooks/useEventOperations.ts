@@ -66,13 +66,18 @@ export const useEventOperations = (editing: boolean, onSave?: () => void) => {
     }
   };
 
-  const deleteEvent = async (id: string) => {
+  const deleteEvent = async ({ id, date }: { id: string; date?: string }) => {
     try {
       const response = await fetch(`/api/events/${id}`, { method: 'DELETE' });
 
       if (!response.ok) {
         throw new Error('Failed to delete event');
       }
+
+      // 특정 날짜만 삭제하도록
+      setEvents((prevEvents) =>
+        prevEvents.filter((event) => !(event.id === id && event.date === date))
+      );
 
       await fetchEvents();
       toast({

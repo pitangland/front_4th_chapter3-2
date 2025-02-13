@@ -438,7 +438,7 @@ function App() {
                     <IconButton
                       aria-label="Delete event"
                       icon={<DeleteIcon />}
-                      onClick={() => deleteEvent(event.id)}
+                      onClick={() => deleteEvent({ id: event.id, date: event.date })}
                     />
                   </HStack>
                 </HStack>
