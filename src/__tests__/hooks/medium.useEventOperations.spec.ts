@@ -230,7 +230,7 @@ describe('반복 유형 선택 (with date-fns)', () => {
   });
 });
 
-describe.only('반복 일정 단일 수정', () => {
+describe('반복 일정 단일 수정', () => {
   it('반복 일정에서 특정 날짜의 일정만 단일 일정으로 변경할 수 있다', async () => {
     setupMockHandlerUpdating();
 
